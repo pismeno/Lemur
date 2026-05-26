@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lemur11"
+version = "0.1.0"
+description = "A simple python-based fullstack framework."
+readme = "README.md"
+authors = [
+    { name = "pismeno", email = "krystof.kloz@gmail.com" }
+]
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "werkzeug>=3.0.0"
+]
+requires-python = ">=3.10"
