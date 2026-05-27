@@ -1,5 +1,5 @@
 from werkzeug.routing import Map, Rule
-from werkzeug.wrappers import Request
+from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException
 
 __url_map = Map()
@@ -10,7 +10,7 @@ def add_route(url: str, name: str, function):
     __url_map.add(Rule(url, endpoint=name))
     __route_functions[name] = function
 
-def dispatch_request(request: Request):
+def dispatch_request(request: Request) -> Response:
     adapter = __url_map.bind_to_environ(request.environ)
     try:
         endpoint, url_vars = adapter.match()

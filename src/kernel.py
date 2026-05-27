@@ -4,11 +4,6 @@ from routing import dispatch_request
 def application(environ, start_response):
     request = Request(environ)
     
-    result = dispatch_request(request)
-    
-    if isinstance(result, Response):
-        response = result
-    else:
-        response = Response(result, mimetype='text/html')
+    response = dispatch_request(request)
         
     return response(environ, start_response)
