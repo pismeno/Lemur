@@ -1,6 +1,6 @@
 import json
 from werkzeug.wrappers import Response
-from utils.assets import get_file_contents
+from lemur.utils.assets import get_file_contents
 
 def make_json_res(data: dict, status: int = 200) -> Response:
     json_string = json.dumps(data)

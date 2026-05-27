@@ -5,7 +5,6 @@ from werkzeug.exceptions import HTTPException
 __url_map = Map()
 __route_functions = {}
 
-
 def add_route(url: str, name: str, function):
     __url_map.add(Rule(url, endpoint=name))
     __route_functions[name] = function

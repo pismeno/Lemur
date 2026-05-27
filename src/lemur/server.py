@@ -1,6 +1,6 @@
 from werkzeug.serving import run_simple
-import test_routes
-from kernel import application
+import lemur.test_routes
+from lemur.kernel import application
 
 if __name__ == "__main__":
     print("---------------------------------------------")

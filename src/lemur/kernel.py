@@ -1,5 +1,5 @@
 from werkzeug.wrappers import Request, Response
-from routing import dispatch_request
+from lemur.routing import dispatch_request
 
 def application(environ, start_response):
     request = Request(environ)

@@ -1,5 +1,5 @@
-from routing import add_route
-from responses import make_view_res
+from lemur.routing import add_route
+from lemur.responses import make_view_res
 
 def gen_html(request):
     return make_view_res("test.html")
