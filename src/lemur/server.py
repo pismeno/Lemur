@@ -1,5 +1,4 @@
 from werkzeug.serving import run_simple
-import lemur.test_routes
 from lemur.kernel import application
 
 if __name__ == "__main__":
