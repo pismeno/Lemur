@@ -5,6 +5,7 @@ from pathlib import Path
 from werkzeug.wrappers import Response
 from lemur.templating import make_view
 from lemur.utils.assets import assets_path
+from lemur.error_handling import make_error_view
 
 def make_json_res(data: dict, status: int = 200) -> Response:
     json_string = json.dumps(data)
@@ -20,6 +21,15 @@ def make_view_res(view_path: str, context: dict = None, status: int = 200) -> Re
 
     return Response(
         response=view_content,
+        status=status,
+        mimetype="text/html"
+    )
+
+def make_error_view_res(status: int) -> Response:
+    error_content = make_error_view(status)
+
+    return Response(
+        response=error_content,
         status=status,
         mimetype="text/html"
     )

@@ -4,6 +4,7 @@ from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException
 
 from lemur.responses import make_spa_app_res
+from lemur.responses import make_error_view_res
 
 __url_map = Map()
 __route_functions = {}
@@ -37,6 +38,13 @@ def dispatch_request(request: Request) -> Response:
         endpoint, url_vars = adapter.match()
         dispatch_function = __route_functions[endpoint]
 
+        if not dispatch_function:
+            return make_error_view_res(500)
+
         return dispatch_function(request)
     except HTTPException as e:
-            return e
+        
+        if e.code == 404:
+            return make_error_view_res(404)
+        
+        return e
