@@ -3,7 +3,7 @@ import requests
 import mimetypes
 from pathlib import Path
 from werkzeug.wrappers import Response
-from lemur.utils.assets import get_file_contents
+from lemur.templating import make_view
 from lemur.utils.assets import assets_path
 
 def make_json_res(data: dict, status: int = 200) -> Response:
@@ -15,8 +15,8 @@ def make_json_res(data: dict, status: int = 200) -> Response:
         mimetype="application/json"
     )
 
-def make_view_res(view_path: str, status: int = 200) -> Response:
-    view_content = get_file_contents(view_path)
+def make_view_res(view_path: str, context: dict = None, status: int = 200) -> Response:
+    view_content = make_view(view_path, context)
 
     return Response(
         response=view_content,
