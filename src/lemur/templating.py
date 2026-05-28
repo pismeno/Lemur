@@ -2,18 +2,22 @@ import re
 import html
 from lemur.utils.assets import get_file_contents
 
+__regex_pattern = r'(?P<VARIABLE>\{\{.*?\}\})|(?P<UNESCAPED_VARIABLE>\{!.*?!\})|(?P<SUBTEMPLATE>\<\<.*?\>\>)'
+
 __templates_cache = {}
 
 def make_view(view_path: str, context: dict = None) -> str:
     if context is None:
         context = {}
 
-    template_tokens = __templates_cache.get(view_path)
+    actual_view_path = view_path if view_path.endswith('.tail') else view_path + '.tail'
+
+    template_tokens = __templates_cache.get(actual_view_path)
     
     if not template_tokens:
-        template_content = get_file_contents(view_path)
+        template_content = get_file_contents(actual_view_path)
         template_tokens = __tokenize_template(template_content)
-        __templates_cache[view_path] = template_tokens
+        __templates_cache[actual_view_path] = template_tokens
 
     rendered_content = ""
 
@@ -28,17 +32,17 @@ def make_view(view_path: str, context: dict = None) -> str:
             variable_name = token["content"].strip()
             variable_value = context.get(variable_name, "")
             rendered_content += str(variable_value)
+        elif token["type"] == "SUBTEMPLATE":
+            rendered_content += make_view(token["content"].strip(), context)
             pass
 
     return rendered_content
 
 def __tokenize_template(template_content: str) -> list:
-    regex_pattern = r'(?P<VARIABLE>\{\{.*?\}\})|(?P<UNESCAPED_VARIABLE>\{!.*?!\})'
-
     tokens = []
     last_end = 0
 
-    for match in re.finditer(regex_pattern, template_content):
+    for match in re.finditer(__regex_pattern, template_content):
         start, end = match.span()
         
         if start > last_end:
