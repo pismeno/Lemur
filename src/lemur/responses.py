@@ -1,7 +1,10 @@
 import json
 import requests
+import os
+import mimetypes
 from werkzeug.wrappers import Response
 from lemur.utils.assets import get_file_contents
+from lemur.utils.assets import assets_path
 
 def make_json_res(data: dict, status: int = 200) -> Response:
     json_string = json.dumps(data)
@@ -21,8 +24,29 @@ def make_view_res(view_path: str, status: int = 200) -> Response:
         mimetype="text/html"
     )
 
-import requests
-from werkzeug.wrappers import Response
+def make_spa_app_res(app_path) -> Response:
+    target_path = assets_path / app_path
+
+    if target_path.is_file():
+        mimetype, _ = mimetypes.guess_type(target_path)
+        
+        if not mimetype:
+            mimetype = 'application/octet-stream' 
+            
+        with open(target_path, 'rb') as file:
+            return Response(file.read(), status=200, mimetype=mimetype)
+
+    if target_path.suffix in ['.js', '.css', '.ico', '.json', '.map']:
+        return Response(f"Asset missing at physical path: {target_path}", status=404, mimetype="text/plain")
+
+    app_name = app_path.parts[0] if app_path.parts else ''
+    index_path = assets_path / app_name / 'index.html'
+    
+    if index_path.is_file():
+        with open(index_path, 'rb') as f:
+            return Response(f.read(), status=200, mimetype='text/html')
+
+    return Response(f"Not found: {target_path}", status=404, mimetype="text/plain")
 
 def make_proxy_res(target_url: str, method: str = "GET", data: bytes = None) -> Response:
     try:

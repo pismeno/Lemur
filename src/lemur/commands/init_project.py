@@ -13,7 +13,7 @@ def run(
         typer.secho(f"Directory '{target_dir}' already exists.", fg=typer.colors.RED)
         raise typer.Exit(code=1)
 
-    template_dir = Path(__file__).parent / "project_template"
+    template_dir = Path(__file__).parent.parent / "project_template"
 
     try:
         shutil.copytree(template_dir, target_dir)
