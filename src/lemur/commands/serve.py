@@ -1,7 +1,8 @@
 from werkzeug.serving import run_simple
 from lemur.kernel import application
 
-if __name__ == "__main__":
+def run():
+    """Start the local development server."""
     print("---------------------------------------------")
     print(" Lemur Server Active!")
     print(" Local address: http://127.0.0.1:8000/")
