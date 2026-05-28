@@ -27,7 +27,7 @@ def mount_spa(url_prefix: str, name: str, app_directory: str):
         safe_subpath = raw_subpath.lstrip('/')
         
         actual_path = base_dir / safe_subpath
-        return make_spa_app_res(actual_path)
+        return make_spa_app_res(str(actual_path))
     
     __route_functions[name] = spa_dispatcher
 

@@ -1,7 +1,7 @@
 import json
 import requests
-import os
 import mimetypes
+from pathlib import Path
 from werkzeug.wrappers import Response
 from lemur.utils.assets import get_file_contents
 from lemur.utils.assets import assets_path
@@ -24,8 +24,9 @@ def make_view_res(view_path: str, status: int = 200) -> Response:
         mimetype="text/html"
     )
 
-def make_spa_app_res(app_path) -> Response:
-    target_path = assets_path / app_path
+def make_spa_app_res(app_path: str) -> Response:
+    path_obj = Path(app_path)
+    target_path = assets_path / path_obj
 
     if target_path.is_file():
         mimetype, _ = mimetypes.guess_type(target_path)
@@ -39,7 +40,7 @@ def make_spa_app_res(app_path) -> Response:
     if target_path.suffix in ['.js', '.css', '.ico', '.json', '.map']:
         return Response(f"Asset missing at physical path: {target_path}", status=404, mimetype="text/plain")
 
-    app_name = app_path.parts[0] if app_path.parts else ''
+    app_name = path_obj.parts[0] if path_obj.parts else ''
     index_path = assets_path / app_name / 'index.html'
     
     if index_path.is_file():
