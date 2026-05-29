@@ -1,7 +1,7 @@
 import os
 import importlib.util
 from pathlib import Path
-from werkzeug.wrappers import Request, Response
+from werkzeug.wrappers import Request
 from lemur.routing import dispatch_request
 
 def application(environ, start_response):

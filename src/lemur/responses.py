@@ -6,7 +6,7 @@ from pathlib import Path
 from lemur.wrappers import Response, HTTPException
 from lemur.templating import make_view
 from lemur.error_handling import make_error_view
-from lemur.utils.assets import private_path
+from lemur.utils.assets import PRIVATE_PATH
 from lemur.utils.assets import get_private_file_contents
 from lemur.utils.assets import get_public_file_contents
 
@@ -58,7 +58,7 @@ def make_error_view_res(e: Exception) -> Response:
 
 def make_spa_app_res(app_path: str) -> Response:
     path_obj = Path(app_path)
-    target_path = private_path / path_obj
+    target_path = PRIVATE_PATH / path_obj
 
     if target_path.is_file():
         mimetype, _ = mimetypes.guess_type(target_path)
@@ -73,7 +73,7 @@ def make_spa_app_res(app_path: str) -> Response:
         raise HTTPException(404, f"Asset missing at physical path: {target_path}")
 
     app_name = path_obj.parts[0] if path_obj.parts else ''
-    index_path = private_path / app_name / 'index.html'
+    index_path = PRIVATE_PATH / app_name / 'index.html'
     
     if index_path.is_file():
         with open(index_path, 'rb') as f:

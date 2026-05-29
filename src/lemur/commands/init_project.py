@@ -1,13 +1,14 @@
 import shutil
 from pathlib import Path
-from typing import Optional
 import typer
+
+from lemur.utils.assets import PROJECT_ROOT_PATH
 
 def run(
     project_name: str = typer.Argument(default=..., help="Name of the project", show_default=False)
 ):
     """Initialize a new Lemur project."""
-    target_dir = Path.cwd() / project_name
+    target_dir = PROJECT_ROOT_PATH / project_name
 
     if target_dir.exists():
         typer.secho(f"Directory '{target_dir}' already exists.", fg=typer.colors.RED)
