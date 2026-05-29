@@ -1,10 +1,12 @@
 from pathlib import Path
+from requests import request
 from werkzeug.routing import Map, Rule
 from werkzeug.wrappers import Request, Response
 from werkzeug.exceptions import HTTPException
 
 from lemur.responses import make_spa_app_res
 from lemur.responses import make_error_view_res
+from lemur.responses import make_file_content_res
 
 __url_map = Map()
 __route_functions = {}
@@ -33,9 +35,14 @@ def mount_spa(url_prefix: str, name: str, app_directory: str):
     __route_functions[name] = spa_dispatcher
 
 def dispatch_request(request: Request) -> Response:
+    if request.path.startswith("/public/"):
+        file_path = request.path.removeprefix("/public/")
+        return make_file_content_res(file_path, private=False)
+
     adapter = __url_map.bind_to_environ(request.environ)
     try:
         endpoint, url_vars = adapter.match()
+        
         dispatch_function = __route_functions[endpoint]
 
         if not dispatch_function:

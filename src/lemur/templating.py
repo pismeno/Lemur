@@ -1,6 +1,6 @@
 import re
 import html
-from lemur.utils.assets import get_file_contents
+from lemur.utils.assets import get_private_file_contents
 
 __regex_pattern = r'(?P<VARIABLE>\{\{.*?\}\})|(?P<UNESCAPED_VARIABLE>\{!.*?!\})|(?P<SUBTEMPLATE>\<\<.*?\>\>)'
 
@@ -15,7 +15,7 @@ def make_view(view_path: str, context: dict = None) -> str:
     template_tokens = __templates_cache.get(actual_view_path)
     
     if not template_tokens:
-        template_content = get_file_contents(actual_view_path)
+        template_content = get_private_file_contents(actual_view_path)
         template_tokens = __tokenize_template(template_content)
         __templates_cache[actual_view_path] = template_tokens
 
