@@ -1,10 +1,11 @@
 import re
 import html
-from lemur.utils.assets import get_private_file_contents
+from lemur.utils.assets import PRIVATE_PATH, get_private_file_contents, get_safe_path
 
 __regex_pattern = r'(?P<VARIABLE>\{\{.*?\}\})|(?P<UNESCAPED_VARIABLE>\{!.*?!\})|(?P<SUBTEMPLATE>\<\<.*?\>\>)'
 
 __templates_cache = {}
+__templates_timestamps = {}
 
 def make_view(view_path: str, context: dict = None) -> str:
     if context is None:
@@ -12,9 +13,12 @@ def make_view(view_path: str, context: dict = None) -> str:
 
     actual_view_path = view_path if view_path.endswith('.tail') else view_path + '.tail'
 
+    safe_view_path = get_safe_path(PRIVATE_PATH, actual_view_path)
+    modification_time = safe_view_path.stat().st_mtime
+
     template_tokens = __templates_cache.get(actual_view_path)
     
-    if not template_tokens:
+    if not template_tokens or __templates_timestamps.get(actual_view_path) != modification_time:
         template_content = get_private_file_contents(actual_view_path)
         template_tokens = __tokenize_template(template_content)
         __templates_cache[actual_view_path] = template_tokens
