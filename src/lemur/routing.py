@@ -22,14 +22,14 @@ __route_functions = {}
 def add_route(
         url: str,
         name: str, 
-        function: Callable[[WerkzeugRequest], LemurResponse], 
+        function: Callable[[LemurRequest], LemurResponse], 
         methods: list[str] = None
         ) -> None:
     
     if methods is None:
         methods = ["GET"]
         
-    __url_map.add(Rule(url, endpoint=name, methods=methods))
+    __url_map.add(Rule(url, endpoint=name, methods=methods, strict_slashes=False))
     __route_functions[name] = function
 
 def mount_spa(
@@ -65,7 +65,7 @@ def dispatch_request(request: WerkzeugRequest) -> WerkzeugResponse:
     adapter = __url_map.bind_to_environ(request.environ)
     
     try:
-        endpoint, url_vars = adapter.match()
+        endpoint, __build_class__ = adapter.match()
         
         dispatch_function = __route_functions.get(endpoint)
 
@@ -73,12 +73,14 @@ def dispatch_request(request: WerkzeugRequest) -> WerkzeugResponse:
             return _abort_internal_server_error(request)
         
         lemur_request = make_lemur_request(request)
-        return dispatch_function(lemur_request, **url_vars)
+        return dispatch_function(lemur_request)
     except WerkzeugHTTPException as e:
+        print(f"Error during request dispatch: {e}")
         lemur_exception = LemurHTTPException(e.code, e.description)
         return _abort(lemur_exception, request)
         
     except Exception as e:
+        print(f"Error during request dispatch: {e}")
         return _abort_internal_server_error(request)
 
 

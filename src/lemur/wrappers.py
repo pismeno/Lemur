@@ -9,6 +9,7 @@ class Request:
     url: str
     ip: str
     
+    args: dict[str, Any]
     input: dict[str, Any]
     
     query: dict[str, Any]
@@ -43,6 +44,7 @@ def make_lemur_request(request: WerkzeugRequest) -> Request:
         url=request.url,
         ip=request.remote_addr or "127.0.0.1",
         
+        args=request.args.to_dict(),
         input=input_data,
         query=request.args.to_dict(),
         files=request.files.to_dict(),

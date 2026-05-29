@@ -1,7 +1,7 @@
 from lemur.templating import make_view
 from lemur.wrappers import HTTPException
 
-__defafult_error_view: str
+__defafult_error_view = None;
 __error_views = {}
 
 def set_default_error_view(view_path: str) -> None:
