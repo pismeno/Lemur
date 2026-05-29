@@ -9,6 +9,12 @@ PROJECT_ROOT_PATH = Path(os.getcwd())
 PRIVATE_PATH = PROJECT_ROOT_PATH / "private"
 PUBLIC_PATH = PROJECT_ROOT_PATH / "public"
 
+def set_project_root(path: str | Path):
+    global PROJECT_ROOT_PATH, PRIVATE_PATH, PUBLIC_PATH
+    PROJECT_ROOT_PATH = Path(path).resolve()
+    PRIVATE_PATH = PROJECT_ROOT_PATH / "private"
+    PUBLIC_PATH = PROJECT_ROOT_PATH / "public"
+
 def get_public_file_contents(path: str) -> str:
     clean_path = path.lstrip("/")
     
