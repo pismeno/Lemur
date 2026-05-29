@@ -22,6 +22,7 @@ def make_view(view_path: str, context: dict = None) -> str:
         template_content = get_private_file_contents(actual_view_path)
         template_tokens = __tokenize_template(template_content)
         __templates_cache[actual_view_path] = template_tokens
+        __templates_timestamps[actual_view_path] = modification_time
 
     rendered_content = ""
 
