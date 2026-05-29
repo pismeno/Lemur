@@ -1,6 +1,6 @@
 import re
 import html
-from lemur.utils.assets import PRIVATE_PATH, get_private_file_contents, get_safe_path
+from lemur.utils.assets import LEMUR_PRIVATE_PATH, PRIVATE_PATH, get_private_file_contents, get_safe_path
 
 __regex_pattern = r'(?P<VARIABLE>\{\{.*?\}\})|(?P<UNESCAPED_VARIABLE>\{!.*?!\})|(?P<SUBTEMPLATE>\<\<.*?\>\>)'
 
@@ -13,7 +13,11 @@ def make_view(view_path: str, context: dict = None) -> str:
 
     actual_view_path = view_path if view_path.endswith('.tail') else view_path + '.tail'
 
-    safe_view_path = get_safe_path(PRIVATE_PATH, actual_view_path)
+    if actual_view_path.startswith("/lemur"):
+        safe_view_path = get_safe_path(LEMUR_PRIVATE_PATH, actual_view_path.removeprefix("/lemur"))
+    else:
+        safe_view_path = get_safe_path(PRIVATE_PATH, actual_view_path)
+        
     modification_time = safe_view_path.stat().st_mtime
 
     template_tokens = __templates_cache.get(actual_view_path)
