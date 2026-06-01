@@ -26,9 +26,9 @@ def make_file_content_res(file_path: str, mimetype: str = None, private: bool = 
             mimetype = 'application/octet-stream'
     
     if private:
-        file_content = get_private_file_contents(file_path)
+        file_content = get_private_file_contents(file_path, binary=True)
     else:
-        file_content = get_public_file_contents(file_path)
+        file_content = get_public_file_contents(file_path, binary=True)
     
     return Response(
         response=file_content,

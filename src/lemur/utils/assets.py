@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import overload, Literal
 
 LEMUR_ROOT = Path(__file__).resolve().parent.parent
 LEMUR_PRIVATE_PATH = LEMUR_ROOT / "private"
@@ -9,23 +10,23 @@ PROJECT_ROOT_PATH = Path(os.getcwd())
 PRIVATE_PATH = PROJECT_ROOT_PATH / "private"
 PUBLIC_PATH = PROJECT_ROOT_PATH / "public"
 
-def get_public_file_contents(path: str) -> str:
+def get_public_file_contents(path: str, binary: bool = False) -> str | bytes:
     clean_path = path.lstrip("/")
     
     if clean_path.startswith("lemur/"):
         relative_path = clean_path.removeprefix("lemur/")
-        return get_file_contents(LEMUR_PUBLIC_PATH, relative_path)
+        return get_file_contents(LEMUR_PUBLIC_PATH, relative_path, binary=binary)
     
-    return get_file_contents(PUBLIC_PATH, clean_path)
+    return get_file_contents(PUBLIC_PATH, clean_path, binary=binary)
 
-def get_private_file_contents(path: str) -> str:
+def get_private_file_contents(path: str, binary: bool = False) -> str | bytes:
     clean_path = path.lstrip("/")
     
     if clean_path.startswith("lemur/"):
         relative_path = clean_path.removeprefix("lemur/")
-        return get_file_contents(LEMUR_PRIVATE_PATH, relative_path)
+        return get_file_contents(LEMUR_PRIVATE_PATH, relative_path, binary=binary)
     
-    return get_file_contents(PRIVATE_PATH, clean_path)
+    return get_file_contents(PRIVATE_PATH, clean_path, binary=binary)
 
 def get_dir_contents(path: str) -> dict[str, list[str]]:
     clean_path = path.lstrip("/")
@@ -44,10 +45,10 @@ def get_dir_contents(path: str) -> dict[str, list[str]]:
         "files": [item.name for item in directory_path.iterdir() if item.is_file()]
     }
 
-
-def get_file_contents(path: Path, suffix_path: str) -> str:
-    with open(get_safe_path(path, suffix_path), "r", encoding="utf-8") as file:
-        return file.read()
+def get_file_contents(path: Path, suffix_path: str, binary: bool = False) -> str | bytes:
+    with open(get_safe_path(path, suffix_path), 'rb') as file:
+        content = file.read()
+        return content if binary else content.decode('utf-8')
 
 def get_safe_path(base_path: Path, suffix_path: str, is_dir: bool = False) -> Path:
     clean_suffix = suffix_path.lstrip("/")
