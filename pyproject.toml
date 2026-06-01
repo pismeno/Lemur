@@ -31,3 +31,9 @@ where = ["src"]
 
 [project.scripts]
 lemur = "lemur.cli:app"
+
+[tool.poetry]
+include = [
+    "**/public/**/*",
+    "**/private/**/*"
+]
