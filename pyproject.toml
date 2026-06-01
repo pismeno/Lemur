@@ -37,3 +37,6 @@ include = [
     "**/public/**/*",
     "**/private/**/*"
 ]
+
+[tool.setuptools.package-data]
+lemur = ["**/private/**/*", "**/public/**/*"]
