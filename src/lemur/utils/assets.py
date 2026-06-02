@@ -59,8 +59,6 @@ def get_safe_path(base_path: Path, suffix_path: str, is_dir: bool = False) -> Pa
     if not target_path.is_relative_to(resolved_base):
         raise PermissionError("Access Denied: Path traversal attempt detected.")
 
-    print(f"CRITICAL DEBUG: I am looking for exactly this file: {target_path}", flush=True)
-        
     if not target_path.exists():
         raise FileNotFoundError("The requested path could not be found.")
     

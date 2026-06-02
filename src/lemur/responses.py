@@ -56,31 +56,6 @@ def make_error_view_res(e: Exception) -> Response:
         mimetype="text/html"
     )
 
-def make_spa_app_res(app_path: str) -> Response:
-    path_obj = Path(app_path)
-    target_path = PRIVATE_PATH / path_obj
-
-    if target_path.is_file():
-        mimetype, _ = mimetypes.guess_type(target_path)
-        
-        if not mimetype:
-            mimetype = 'application/octet-stream' 
-            
-        with open(target_path, 'rb') as file:
-            return Response(file.read(), status=200, mimetype=mimetype)
-
-    if target_path.suffix in ['.js', '.css', '.ico', '.json', '.map']:
-        raise HTTPException(404, f"Asset missing at physical path: {target_path}")
-
-    app_name = path_obj.parts[0] if path_obj.parts else ''
-    index_path = PRIVATE_PATH / app_name / 'index.html'
-    
-    if index_path.is_file():
-        with open(index_path, 'rb') as f:
-            return Response(f.read(), status=200, mimetype='text/html')
-
-    raise HTTPException(404, f"SPA app not found at path: {app_path}")
-
 def make_proxy_res(target_url: str, method: str = "GET", data: bytes = None) -> Response:
     external_response = requests.request(
         method=method,
