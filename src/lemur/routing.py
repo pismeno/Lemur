@@ -47,7 +47,7 @@ def mount_spa(
 
     def spa_dispatcher(request: LemurRequest, subpath: str = ""):
         safe_subpath = subpath.lstrip('/')
-        safe_app_dir = app_directory.lstrip('/')
+        safe_app_dir = app_directory.strip('/')
         
         if safe_subpath:
             full_target = f"{safe_app_dir}/{safe_subpath}"
@@ -69,8 +69,7 @@ def mount_spa(
         if target_path.suffix in ['.js', '.css', '.ico', '.json', '.map']:
             raise LemurHTTPException(404, f"Asset missing at physical path: {target_path}")
 
-        app_name = path_obj.parts[0] if path_obj.parts else ''
-        index_path = PRIVATE_PATH / app_name / 'index.html'
+        index_path = PRIVATE_PATH / Path(safe_app_dir) / 'index.html'
         
         if index_path.is_file():
             with open(index_path, 'rb') as f:
