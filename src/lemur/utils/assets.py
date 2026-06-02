@@ -28,7 +28,7 @@ def get_private_file_contents(path: str, binary: bool = False) -> str | bytes:
     
     return get_file_contents(PRIVATE_PATH, clean_path, binary=binary)
 
-def get_dir_contents(path: str) -> dict[str, list[str]]:
+def get_dir_contents(path: str) -> tuple[list[str], list[str]]:
     clean_path = path.lstrip("/")
     
     if clean_path.startswith("lemur/"):
@@ -40,10 +40,10 @@ def get_dir_contents(path: str) -> dict[str, list[str]]:
         target_suffix = clean_path
         
     directory_path = get_safe_path(base_path, target_suffix, is_dir=True)
-    return {
-        "directories": [item.name for item in directory_path.iterdir() if item.is_dir()],
-        "files": [item.name for item in directory_path.iterdir() if item.is_file()]
-    }
+    return (
+        [item.name for item in directory_path.iterdir() if item.is_dir()], # directories
+        [item.name for item in directory_path.iterdir() if item.is_file()] # files
+    )
 
 def get_file_contents(path: Path, suffix_path: str, binary: bool = False) -> str | bytes:
     with open(get_safe_path(path, suffix_path), 'rb') as file:
