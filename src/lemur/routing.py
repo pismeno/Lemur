@@ -85,9 +85,15 @@ def dispatch_request(request: WerkzeugRequest) -> WerkzeugResponse:
         if request.path.startswith("/public/"):
             file_path = request.path.removeprefix("/public/")
             return make_file_content_res(file_path, private=False)
-
-        adapter = __url_map.bind_to_environ(request.environ)
     
+    except FileNotFoundError:
+        _abort(LemurHTTPException(404, "Public asset not found"), request)
+    except PermissionError:
+        _abort(LemurHTTPException(403, "Access denied"), request)
+
+    adapter = __url_map.bind_to_environ(request.environ)
+    
+    try:
         endpoint, kwargs = adapter.match()
         
         dispatch_function = __route_functions.get(endpoint)
