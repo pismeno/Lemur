@@ -3,7 +3,8 @@ import requests
 import mimetypes
 from pathlib import Path
 
-from lemur.wrappers import Response, HTTPException
+from lemur.wrappers import Response
+from lemur.exceptions import HTTPException
 from lemur.templating import make_view
 from lemur.error_handling import make_error_view
 from lemur.utils.assets import PRIVATE_PATH

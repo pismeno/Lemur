@@ -11,7 +11,7 @@ from lemur.utils.assets import PRIVATE_PATH
 from lemur.wrappers import make_lemur_request
 from lemur.wrappers import Request as LemurRequest
 from lemur.wrappers import Response as LemurResponse
-from lemur.wrappers import HTTPException as LemurHTTPException
+from lemur.exceptions import HTTPException as LemurHTTPException
 
 from lemur.responses import make_error_view_res
 from lemur.responses import make_file_content_res

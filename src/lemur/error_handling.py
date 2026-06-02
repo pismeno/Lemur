@@ -1,5 +1,5 @@
 from lemur.templating import make_view
-from lemur.wrappers import HTTPException
+from lemur.exceptions import HTTPException
 
 __defafult_error_view = None;
 __error_views = {}
