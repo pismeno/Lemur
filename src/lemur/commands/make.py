@@ -9,9 +9,11 @@ def run(
     """Make a new view, or route."""
     match what:
         case "view":
-            __make_view_file(name)
+            __make_template_file(name)
         case "tail":
-            __make_view_file(name)
+            __make_template_file(name)
+        case "template":
+            __make_template_file(name)
         case "route":
             __make_routing_file(name)
         case "router":
@@ -30,7 +32,7 @@ def __make_routing_file(name: str):
     except FileExistsError:
         print(f"Error: The file '{file_name}' already exists!")
 
-def __make_view_file(name: str):
+def __make_template_file(name: str):
     file_name = name if name.endswith(".tail") else name + ".tail"
 
     try:
