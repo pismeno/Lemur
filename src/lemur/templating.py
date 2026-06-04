@@ -1,5 +1,6 @@
 import re
 import html
+from unittest import case
 
 from lemur.utils.assets import LEMUR_PRIVATE_PATH, PRIVATE_PATH, get_private_file_contents, get_safe_path
 from lemur.utils.collections import VarTable
@@ -73,99 +74,120 @@ def __handle_logic_token(tokens: list, current_index: int, var_table: VarTable) 
     logic_content = token["content"].strip()
     words = logic_content.split()
     
-    if words[0] == "foreach":
-        if len(words) != 4 or not words[1].startswith("@") or words[2] != "in" or not words[3].startswith("@"):
+    if not words:
+        return "", current_index
+
+    match words[0]:
+        case "foreach":
+            return __handle_foreach(logic_content, words, tokens, current_index, var_table)
+        case "endforeach":
+            raise InvalidTemplateException("Unexpected 'endforeach' without an opening 'foreach' tag.")
+        case "if":
+            return __handle_if(logic_content, words, tokens, current_index, var_table)
+        case "endif":
+            raise InvalidTemplateException("Unexpected 'endif' without an opening 'if' tag.")
+        case _:
+            raise InvalidTemplateException(f"Unknown logic call: {logic_content}")
+
+
+def __handle_foreach(logic_content: str, words: list, tokens: list, current_index: int, var_table: VarTable) -> tuple[str, int]:
+    if not words[-1].startswith("@"):
+        raise InvalidTemplateException(f"Invalid 'foreach' syntax: {logic_content}")
+    
+    iterable_var_name = words[-1][1:]
+    iterable = var_table.get(iterable_var_name, [])
+    
+    inner_tokens, end_index = __get_inner_block(logic_content, tokens, current_index, "foreach", "endforeach")
+    rendered_content = ""
+
+    # Handle Lists
+    if isinstance(iterable, list):
+        if len(words) != 4 or not words[1].startswith("@") or words[2] != "in":
             raise InvalidTemplateException(f"Invalid 'foreach' syntax: {logic_content}")
-        
+            
         loop_var_name = words[1][1:]
-        iterable_var_name = words[3][1:]
-        iterable = var_table.get(iterable_var_name, [])
         
-        if not isinstance(iterable, list):
-            raise InvalidTemplateException(f"Variable '{iterable_var_name}' is not a list.")
-
-        depth = 1
-        end_index = current_index + 1
-        while end_index < len(tokens):
-            if tokens[end_index]["type"] == "LOGIC":
-                inner_logic = tokens[end_index]["content"].strip().split()
-                if inner_logic[0] == "foreach":
-                    depth += 1 
-                elif inner_logic[0] == "endforeach":
-                    depth -= 1
-                    if depth == 0:
-                        break
-            end_index += 1
-        
-        if depth != 0:
-            raise InvalidTemplateException(f"Missing 'endforeach' for loop starting with: {logic_content}")
-
-        inner_tokens = tokens[current_index + 1 : end_index]
-        rendered_content = ""
-
         for item in iterable:
             var_table.enter_scope()
             var_table.define(loop_var_name, item) 
             rendered_content += __render_tokens(inner_tokens, var_table) 
             var_table.exit_scope()
 
-        return rendered_content, end_index
-
-    elif words[0] == "endforeach":
-        raise InvalidTemplateException("Unexpected 'endforeach' without an opening 'foreach' tag.")
-    
-    if words[0] == "if":
-        if len(words) > 3 or len(words) < 2:
-            raise InvalidTemplateException(f"Invalid 'if' syntax: {logic_content}")
+    # Handle Dictionaries
+    elif isinstance(iterable, dict):
+        if len(words) != 5 or not words[1].startswith("@") or not words[2].startswith("@") or words[3] != "in":
+            raise InvalidTemplateException(f"Invalid 'foreach' syntax: {logic_content}")
         
-        if len(words) == 3:
-            if not words[1] == "not":
-                raise InvalidTemplateException(f"Invalid 'if' syntax: {logic_content}")
-            if not words[2].startswith("@"):
-                raise InvalidTemplateException(f"Invalid 'if' syntax: {logic_content}")
+        key_var_name = words[1][1:]
+        value_var_name = words[2][1:]
+        
+        for key, value in iterable.items():
+            var_table.enter_scope()
+            var_table.define(key_var_name, key) 
+            var_table.define(value_var_name, value) 
+            rendered_content += __render_tokens(inner_tokens, var_table) 
+            var_table.exit_scope()
             
-            condition_var_name = words[2][1:]
-            condition_value = var_table.get(condition_var_name, False)
-            
-        if len(words) == 2:
-            if not words[1].startswith("@"):
-                raise InvalidTemplateException(f"Invalid 'if' syntax: {logic_content}")
-
-            condition_var_name = words[1][1:]
-            condition_value = var_table.get(condition_var_name, False)        
-
-        if condition_value not in [True, False]:
-            raise InvalidTemplateException(f"Variable '{condition_var_name}' is not a boolean.")
-        
-        if len(words) == 3:
-            condition_value = not condition_value
-        
-        depth = 1
-        end_index = current_index + 1
-        while end_index < len(tokens):
-            if tokens[end_index]["type"] == "LOGIC":
-                inner_logic = tokens[end_index]["content"].strip().split()
-                if inner_logic[0] == "if":
-                    depth += 1 
-                elif inner_logic[0] == "endif":
-                    depth -= 1
-                    if depth == 0:
-                        break
-            end_index += 1
-        
-        if depth != 0:
-            raise InvalidTemplateException(f"Missing 'endif' for 'if' statement starting with: {logic_content}")
-
-        inner_tokens = tokens[current_index + 1 : end_index]
-        rendered_content = ""
-
-        if condition_value:
-            rendered_content = __render_tokens(inner_tokens, var_table)
-
-        return rendered_content, end_index
-        
     else:
-        raise InvalidTemplateException(f"Unknown logic call: {logic_content}")
+        raise InvalidTemplateException(f"Variable '{iterable_var_name}' is not iterable.")
+
+    return rendered_content, end_index
+
+
+def __handle_if(logic_content: str, words: list, tokens: list, current_index: int, var_table: VarTable) -> tuple[str, int]:
+    if len(words) not in (2, 3):
+        raise InvalidTemplateException(f"Invalid 'if' syntax: {logic_content}")
+        
+    is_negated = (len(words) == 3)
+    
+    if is_negated and words[1] != "not":
+        raise InvalidTemplateException(f"Invalid 'if' syntax: {logic_content}")
+        
+    var_word = words[2] if is_negated else words[1]
+    
+    if not var_word.startswith("@"):
+        raise InvalidTemplateException(f"Invalid 'if' syntax: {logic_content}")
+
+    condition_var_name = var_word[1:]
+    condition_value = var_table.get(condition_var_name, False)        
+
+    if not isinstance(condition_value, bool):
+        raise InvalidTemplateException(f"Variable '{condition_var_name}' is not a boolean.")
+        
+    if is_negated:
+        condition_value = not condition_value
+        
+    inner_tokens, end_index = __get_inner_block(logic_content, tokens, current_index, "if", "endif")
+
+    rendered_content = __render_tokens(inner_tokens, var_table) if condition_value else ""
+
+    return rendered_content, end_index
+
+def __get_inner_block(logic_content: str, tokens: list, start_index: int, open_tag: str, close_tag: str) -> tuple[list, int]:
+    """Finds the matching closing tag and returns the inner tokens and the end index."""
+    depth = 1
+    end_index = start_index + 1
+    
+    while end_index < len(tokens):
+        if tokens[end_index]["type"] == "LOGIC":
+            inner_logic = tokens[end_index]["content"].strip().split()
+            if not inner_logic:
+                end_index += 1
+                continue
+                
+            if inner_logic[0] == open_tag:
+                depth += 1 
+            elif inner_logic[0] == close_tag:
+                depth -= 1
+                if depth == 0:
+                    break
+        end_index += 1
+        
+    if depth != 0:
+        raise InvalidTemplateException(f"Missing '{close_tag}' for statement starting with: {logic_content}")
+
+    inner_tokens = tokens[start_index + 1 : end_index]
+    return inner_tokens, end_index
 
 def __tokenize_template(template_content: str) -> list:
     tokens = []
