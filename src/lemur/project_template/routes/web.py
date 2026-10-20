@@ -1,0 +1,1 @@
+from lemur.routing import add_route
