@@ -19,24 +19,18 @@ classifiers = [
 dependencies = [
     "werkzeug>=3.0.0",
     "typer>=0.12.0",
-    "requests>=2.31.0"
+    "requests>=2.31.0",
 ]
 requires-python = ">=3.10"
-
-[tool.setuptools]
-package-dir = {"" = "src"}
-
-[tool.setuptools.packages.find]
-where = ["src"]
 
 [project.scripts]
 lemur = "lemur.cli:app"
 
-[tool.poetry]
-include = [
-    "**/public/**/*",
-    "**/private/**/*"
-]
+[tool.setuptools.packages.find]
+where = ["src"]
 
 [tool.setuptools.package-data]
-lemur = ["**/private/**/*", "**/public/**/*"]
+lemur = [
+    "public/**/*",
+    "private/**/*",
+]

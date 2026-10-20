@@ -1,6 +1,7 @@
 import typer
 
 from lemur.utils.assets import PRIVATE_PATH
+from lemur.utils.assets import PROJECT_ROOT_PATH
 
 def run(
     what: str = typer.Argument(default=..., help="What to make", show_default=False),
@@ -26,7 +27,7 @@ def __make_routing_file(name: str):
     file_name = name if name.endswith(".py") else name + ".py"
 
     try:
-        with open(file_name, "x", encoding="utf-8") as file:
+        with open(PROJECT_ROOT_PATH / "routes" / file_name, "x", encoding="utf-8") as file:
             file.write("from lemur.routing import add_route\n")
         print(f"Routing file '{file_name}' created successfully.")
     except FileExistsError:

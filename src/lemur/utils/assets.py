@@ -62,7 +62,6 @@ def get_safe_path(base_path: Path, suffix_path: str, is_dir: bool = False) -> Pa
     if not target_path.exists():
         raise FileNotFoundError("The requested path could not be found.")
     
-    # Check for file or directory based on expected type
     if is_dir and not target_path.is_dir():
         raise NotADirectoryError("The requested path is not a directory.")
     if not is_dir and not target_path.is_file():
