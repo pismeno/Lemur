@@ -56,8 +56,10 @@ def set_error_view(status_code: int, view_path: str) -> None
 ```
 
 ## Templates (tails)
-
 The templating engine lets you write logic directly into your HTML.
+
+Create a template using:
+`lemur make template template_name`
 ### Variables
 Inject dynamic data using double curly braces. 
 ```html
